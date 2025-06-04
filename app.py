@@ -67,8 +67,9 @@ def analyze_lead_with_gpt(api_key, url, website_text):
     """
 
     try:
-        client = OpenAI(api_key=api_key)
-        response = client.chat.completions.create(
+        import openai
+        openai.api_key = api_key
+        response = openai.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.2
@@ -76,6 +77,7 @@ def analyze_lead_with_gpt(api_key, url, website_text):
         return response.choices[0].message.content
     except Exception as e:
         return f"Fehler bei GPT: {e}"
+
 
 # Website-Inhalte holen
 def scrape_website_text(url):
