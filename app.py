@@ -1,5 +1,5 @@
 import streamlit as st
-from openai import OpenAI
+import openai
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -67,9 +67,8 @@ def analyze_lead_with_gpt(api_key, url, website_text):
     """
 
     try:
-        import openai
         openai.api_key = api_key
-        response = openai.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.2
@@ -77,7 +76,6 @@ def analyze_lead_with_gpt(api_key, url, website_text):
         return response.choices[0].message.content
     except Exception as e:
         return f"Fehler bei GPT: {e}"
-
 
 # Website-Inhalte holen
 def scrape_website_text(url):
