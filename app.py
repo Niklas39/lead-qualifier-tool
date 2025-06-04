@@ -4,15 +4,50 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 
+def get_google_urls_from_serpapi(query, api_key, max_results=50):
+    search_url = "https://serpapi.com/search"
+    params = {
+        "q": query,
+        "engine": "google",
+        "api_key": api_key,
+        "num": 50,
+        "hl": "de",
+        "gl": "de"
+    }
+    res = requests.get(search_url, params=params)
+    if res.status_code != 200:
+        return [], f"SerpAPI Fehler: {res.text}"
+
+    data = res.json()
+    links = [r.get("link") for r in data.get("organic_results", []) if r.get("link")]
+    return links, None
+
 # Streamlit App-Konfiguration
 st.set_page_config(page_title="Lead-Scraper & Qualifier", layout="centered")
 st.title("🔍 Lead Scraper & Qualifier für Cold Calling")
 
-# Eingabe des API-Keys
-openai_api_key = st.text_input("🔑 Dein OpenAI API Key", type="password")
+# Eingabe des OpenAI-Keys
+openai_api_key = st.text_input("🧠 Dein OpenAI API Key", type="password")
 
-# Eingabe der URLs
-urls_input = st.text_area("🌐 Füge hier deine Website-URLs ein (eine pro Zeile):")
+# Moduswahl
+modus = st.radio("🔍 Wähle Eingabemethode", ["Manuell (URLs einfügen)", "Google-Suche über SerpAPI"])
+
+# URL-Eingabe
+urls = []
+if modus == "Manuell (URLs einfügen)":
+    urls_input = st.text_area("🌐 Füge hier deine Website-URLs ein (eine pro Zeile):")
+    if urls_input:
+        urls = [line.strip() for line in urls_input.strip().splitlines() if line.strip()]
+else:
+    SERP_API_KEY = st.text_input("🔎 Dein SerpAPI Key", type="password")
+    suchbegriff = st.text_input("🔎 Dein Google-Suchbegriff (z. B. 'kostenloses Erstgespräch Coach site:.de')")
+    if suchbegriff and SERP_API_KEY:
+        urls, error = get_google_urls_from_serpapi(suchbegriff, SERP_API_KEY)
+        if error:
+            st.error(error)
+        else:
+            st.success(f"{len(urls)} URLs von Google geladen.")
+            st.write(urls)
 
 # Start-Button
 start = st.button("🚀 Analyse starten")
@@ -56,10 +91,9 @@ def scrape_website_text(url):
 if start:
     if not openai_api_key:
         st.warning("Bitte trage deinen OpenAI API Key ein.")
-    elif not urls_input.strip():
-        st.warning("Bitte füge mindestens eine URL ein.")
+    elif not urls:
+        st.warning("Bitte gib URLs ein oder führe eine Google-Suche aus.")
     else:
-        urls = [line.strip() for line in urls_input.strip().splitlines() if line.strip()]
         result_list = []
 
         with st.spinner("Analysiere Websites..."):
