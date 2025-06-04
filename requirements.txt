@@ -1,4 +1,4 @@
-openai==1.1.1
+openai==1.23.6
 streamlit
 requests
 beautifulsoup4
