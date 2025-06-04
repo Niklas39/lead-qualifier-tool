@@ -64,17 +64,18 @@ def analyze_lead_with_gpt(api_key, url, website_text):
     Am Ende: Ist die Seite geeignet für Cold Calling? (Ja/Nein + Begründung)
     Website-Inhalt: {website_text}
     """
-
     try:
-        client = OpenAI(api_key=api_key)
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.2
+        openai.api_key = api_key
+        response = openai.Completion.create(
+            model="text-davinci-003",
+            prompt=prompt,
+            temperature=0.2,
+            max_tokens=1000
         )
-        return response.choices[0].message.content
+        return response.choices[0].text.strip()
     except Exception as e:
         return f"Fehler bei GPT: {e}"
+
 
 # Website-Inhalte holen
 def scrape_website_text(url):
