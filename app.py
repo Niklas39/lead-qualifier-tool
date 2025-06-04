@@ -1,5 +1,5 @@
 import streamlit as st
-import openai
+from openai import OpenAI
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -52,8 +52,7 @@ else:
 # Start-Button
 start = st.button("🚀 Analyse starten")
 
-# GPT-Funktion
-
+# GPT-Funktion (GPT-4 via OpenAI Client)
 def analyze_lead_with_gpt(api_key, url, website_text):
     prompt = f"""
     Du bist ein Lead-Qualifizierer. Prüfe die Website {url} auf folgende Kriterien:
@@ -67,8 +66,8 @@ def analyze_lead_with_gpt(api_key, url, website_text):
     """
 
     try:
-        openai.api_key = api_key
-        response = openai.ChatCompletion.create(
+        client = OpenAI(api_key=api_key)
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.2
