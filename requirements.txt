@@ -1,5 +1,5 @@
 streamlit
-openai
+openai==1.23.6
 requests
 beautifulsoup4
 pandas
